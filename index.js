@@ -9,6 +9,7 @@ const morgan = require("morgan");
 const errorHandler = require("./handlers/error");
 const authRoute = require("./routes/authRoute");
 const messagesRoutes = require("./routes/messagesRoute");
+const { isLoggedIn, isAuthor } = require("./middleware/authMiddleware");
 const User = require('./models/user');
 const passport = require('passport');
 const LocalStrategy = require("passport-local");
@@ -30,7 +31,8 @@ passport.deserializeUser(User.deserializeUser());
 
 // routes
 app.use("/api/auth", authRoute);
-app.use("/api/users/:id/messages", messagesRoutes);
+app.use("/api/users/:id/messages", isLoggedIn, isAuthor, messagesRoutes);
+
 
 // 404 for routes not found
 app.use( (req, res, next) => {
