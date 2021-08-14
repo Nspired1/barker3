@@ -14,6 +14,7 @@ const User = require('./models/user');
 const passport = require('passport');
 const LocalStrategy = require("passport-local");
 const bodyParser = require("body-parser");
+const Message = require("./models/message");
 
 const PORT = process.env.PORT || 8081;
 const IP = process.env.IP;
@@ -33,6 +34,14 @@ passport.deserializeUser(User.deserializeUser());
 app.use("/api/auth", authRoute);
 app.use("/api/users/:id/messages", isLoggedIn, isAuthor, messagesRoutes);
 
+app.get("/api/messages", isLoggedIn, async (req, res, next) => {
+    try {
+        const messages = await db.Message.find().passport({ createdAt: "desc"}).populate("user", {username: true, profileImageUrl: true});
+        return res.status(200).json(messages);
+    } catch(err){
+        return next(err)
+    }
+})
 
 // 404 for routes not found
 app.use( (req, res, next) => {
